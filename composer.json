@@ -16,9 +16,7 @@
     },
     "autoload": {
         "classmap": ["auth.php"],
-		    "psr-0": {
-            "Detection": "namespaced/"
-        }
+		    "psr-0": { "Auth" : "" }
     },
     "include-path": [""]
 }

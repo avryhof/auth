@@ -1,10 +1,4 @@
 <?
-/* ********************
- * A Class that is somewhat compatible with pear auth.
- * Designed to work with my own Database Abstraction layer
- * since the Pear Libs don't seem to be getting much love these days.
- */
-
  	class Auth {
 		var $driver, $db, $loginfunction, $session_cache;
 		var $session_storage = "session";

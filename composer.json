@@ -15,8 +15,7 @@
         "php": ">=5.0.0"
     },
     "autoload": {
-        "classmap": ["auth.php"],
-		    "psr-0": { "Auth" : "" }
+        "classmap" : ["auth.php"]
     },
     "include-path": [""]
 }

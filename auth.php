@@ -1,10 +1,10 @@
 <?
 /* ********************
  * A Class that is somewhat compatible with pear auth.
- * Designed to work with my own Database Abstraction layer 
+ * Designed to work with my own Database Abstraction layer
  * since the Pear Libs don't seem to be getting much love these days.
  */
- 
+
  	class Auth {
 		var $driver, $db, $loginfunction, $session_cache;
 		var $session_storage = "session";
@@ -17,20 +17,21 @@
 			"usernamecol" 	=> "username",
 			"passwordcol" 	=> "password"
 		);
-		
+
 		public function __construct($driver = "Database", $options, $loginFunction = false, $optional) {
 			$this->startSession();
 			$this->driver = $driver;
 			$this->loginfunction = $loginFunction;
 			$this->opts = $this->mergeoptions($this->opts, $options);
-			
+
 			/* We might want to be able to use other classes in the future */
 			if (class_exists($this->driver)) {
 				$this->db = new $this->driver($this->opts['dsn']);
 			}
 		}
-		
+
 		function start() {
+            $this->startSession();
 			$username = $this->db->escape($_POST['username']);
 			$password = $this->hasher($_POST['password']);
 			$users = $this->db->query("SELECT * FROM `".$this->opts['table']."` WHERE `".$this->opts['usernamecol']."` = '$username' AND `".$this->opts['passwordcol']."` = '$password'");
@@ -44,22 +45,22 @@
 				return $this->authenticated;
 			}
 		}
-		
+
 		function addUser($username, $password) {
 			$this->db->query("INSERT INTO `".$this->opts['table']."` (`".$this->opts['usernamecol']."`,`".$this->opts['passwordcol']."`) VALUES ('$username','".$this->hasher($password)."')");
 			return ($this->db->errno > 0 ? false: true);
 		}
-		
+
 		function changePassword ($username, $password) {
 			$this->db->query("UPDATE `".$this->opts['table']."` SET `".$this->opts['passwordcol']."` = '".$this->hasher($password)."' WHERE `".$this->opts['usernamecol']."` = '$username'");
 			return ($this->db->errno > 0 ? false: true);
 		}
-		
+
 		function removeUser ($username) {
 			$this->db->query("DELETE * FROM `".$this->opts['table']."` WHERE `".$this->opts['usernamecol']."` = '$username'");
 			return ($this->db->errno > 0 ? false: true);
 		}
-		
+
 		function listUsers() {
 			$users = $this->db->query("SELECT `".$this->opts['usernamecol']."` FROM `".$this->opts['table']."` ORDER BY `".$this->opts['usernamecol']."`");
 			$retn = array();
@@ -69,22 +70,22 @@
 			}
 			return $retn;
 		}
-		
+
 		function logout() {
 			$this->username = "";
 			$this->authenticated = false;
 			$this->setSession("_auth_username", $this->username);
 			$this->setSession("_auth_authenticated", $this->authenticated);
 		}
-		
+
 		function getUsername() {
 			return $this->username;
 		}
-				
+
 		function checkAuth() {
 			return ($this->authenticated == true ? true : false);
 		}
-		
+
 		function setSession($key, $value) {
 			if ($this->session_storage == "file") {
 				$this->session_array[$key] = $value;
@@ -93,7 +94,7 @@
 				$_SESSION[$key] = $value;
 			}
 		}
-		
+
 		function getSession($key) {
 			if ($this->session_storage == "file") {
 				$this->session_array = unserialize(file_get_contents($this->session_cache));
@@ -102,7 +103,7 @@
 				return $_SESSION[$key];
 			}
 		}
-		
+
 		function startSession() {
 			if (session_status() == PHP_SESSION_DISABLED) {
 				if (!is_dir(getcwd()."/sessions")) { mkdir(getcwd()."/sessions"); }
@@ -123,7 +124,7 @@
 				}
 			}
 		}
-		
+
 		function hasher($string, $hashfunction = false, $salt = "") {
 			if ($hashfunction == "crypt") {
 				/* See http://us3.php.net/manual/en/function.crypt.php */
@@ -136,7 +137,7 @@
 				return(hash((!$hashfunction ? "md5" : $hashfunction), $string));
 			}
 		}
-		
+
 		function mergeoptions($defaults, $changes) {
 			/* Only act if the changes are an array */
 			if (is_array($changes) && count($changes) > 0) {

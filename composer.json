@@ -1,0 +1,24 @@
+{
+    "name": "avryhof/auth",
+    "description": "Authentication class similar to Pear Auth",
+    "type": "library",
+    "keywords": ["auth","authentication","pear"],
+    "homepage": "https://github.com/avryhof/auth",
+    "license": "MIT",
+    "authors": [
+        {
+            "email": "amos@vryhofresearch.com",
+            "name": "Amos Vryhof"
+        }
+    ],
+    "require": {
+        "php": ">=5.0.0"
+    },
+    "autoload": {
+        "classmap": ["auth.php"],
+		    "psr-0": {
+            "Detection": "namespaced/"
+        }
+    },
+    "include-path": [""]
+}

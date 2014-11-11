@@ -29,7 +29,7 @@
 
 		function start() {
             $this->startSession();
-            if (!$this->authenticated) {
+            if (!$this->authenticated && isset($_POST['username']) && isset($_POST['password'])) {
 				$username = $this->db->escape($_POST['username']);
 				$password = $this->hasher($_POST['password']);
 				$users = $this->db->select(

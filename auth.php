@@ -1,6 +1,7 @@
 <?
  	class Auth {
 		var $driver, $db, $loginfunction, $session_cache;
+		var $debug = false;
 		var $session_storage = "session";
 		var $authenticated = false;
 		var $session_array = array();
@@ -13,6 +14,8 @@
 		);
 
 		public function __construct($driver = "Database", $options, $loginFunction = false, $optional) {
+			global $debug;
+			$this->debug = ((isset($_GET['debug']) && !empty($_GET['debug'])) || $debug == true);
 			$this->startSession();
 			$this->driver = $driver;
 			$this->loginfunction = $loginFunction;
@@ -93,6 +96,11 @@
 		}
 
 		function checkAuth() {
+			if ($this->debug) { 
+				$this->console_log($_SESSION['_auth_authenticated']);
+				$this->console_log($this->getSession('_auth_authenticated'));
+				$this->console_log($this->authenticated);
+			}
 			return ($this->authenticated == true ? true : false);
 		}
 
@@ -123,13 +131,13 @@
 					$this->session_array = unserialize(file_get_contents($this->session_cache));
 					if (is_array($this->session_array)) {
 						$this->username = $this->session_array['_auth_username'];
-						$this->authenticated = $this->session_array['_auth_authenticated'];
+						$this->authenticated = ($this->session_array['_auth_authenticated'] == "true");
 					}
 				}
 			} elseif (session_status() == PHP_SESSION_NONE) {
 				session_start();
 				if (isset($_SESSION['_auth_authenticated'])) {
-					$this->authenticated = $this->session_array['_auth_authenticated'];
+					$this->authenticated = ($this->session_array['_auth_authenticated'] == "true");
 					$this->username = $this->session_array['_auth_username'];
 				}
 			}
@@ -165,6 +173,10 @@
 			} else {
 				return $defaults;
 			}
+		}
+
+		function console_log($message) {
+			echo "<script> console.log('Auth: ".$message."'); </script>";
 		}
   }
 ?>

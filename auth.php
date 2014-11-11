@@ -29,23 +29,27 @@
 
 		function start() {
             $this->startSession();
-			$username = $this->db->escape($_POST['username']);
-			$password = $this->hasher($_POST['password']);
-			$users = $this->db->select(
-					"*",
-					$this->opts['table'],
-					array(
-						$this->opts['usernamecol'] => $username,
-						$this->opts['passwordcol'] => $password
-					)
-				);
-			if ($users->num_rows > 0) {
-				$this->username = $username;
-				$this->authenticated = true;
-				$this->setSession("_auth_username", $this->username);
-				$this->setSession("_auth_authenticated", $this->authenticated);
+            if (!$this->authenticated) {
+				$username = $this->db->escape($_POST['username']);
+				$password = $this->hasher($_POST['password']);
+				$users = $this->db->select(
+						"*",
+						$this->opts['table'],
+						array(
+							$this->opts['usernamecol'] => $username,
+							$this->opts['passwordcol'] => $password
+						)
+					);
+				if ($users->num_rows > 0) {
+					$this->username = $username;
+					$this->authenticated = true;
+					$this->setSession("_auth_username", $this->username);
+					$this->setSession("_auth_authenticated", $this->authenticated);
+				} else {
+					$this->setSession("_auth_authenticated", $this->authenticated);
+					return $this->authenticated;
+				}
 			} else {
-				$this->setSession("_auth_authenticated", $this->authenticated);
 				return $this->authenticated;
 			}
 		}
@@ -130,17 +134,18 @@
 				if (file_exists($this->session_cache)) {
 					$this->session_array = unserialize(file_get_contents($this->session_cache));
 					if (is_array($this->session_array)) {
-						$this->username = $this->session_array['_auth_username'];
-						$this->authenticated = ($this->session_array['_auth_authenticated'] == "true");
+						$this->username = $this->getSession('_auth_username');
+						$this->authenticated = ($this->getSession('_auth_authenticated']) == "true");
 					}
 				}
 			} elseif (session_status() == PHP_SESSION_NONE) {
 				session_start();
 				if (isset($_SESSION['_auth_authenticated'])) {
-					$this->authenticated = ($this->session_array['_auth_authenticated'] == "true");
-					$this->username = $this->session_array['_auth_username'];
+					$this->authenticated = ($this->getSession('_auth_authenticated') == "true");
+					$this->username = $this->getSession('_auth_username');
 				}
 			}
+			$this->console_log($this->session_storage);
 		}
 
 		function hasher($string, $hashfunction = false, $salt = "") {

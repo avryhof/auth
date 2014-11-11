@@ -28,7 +28,7 @@
 		}
 
 		function start() {
-            $this->startSession();
+            // $this->startSession();
             if (!$this->authenticated && isset($_POST['username']) && isset($_POST['password'])) {
 				$username = $this->db->escape($_POST['username']);
 				$password = $this->hasher($_POST['password']);
@@ -100,7 +100,7 @@
 		}
 
 		function checkAuth() {
-			if ($this->debug) { 
+			if ($this->debug) {
 				$this->console_log($_SESSION['_auth_authenticated']);
 				$this->console_log($this->getSession('_auth_authenticated'));
 				$this->console_log($this->authenticated);
@@ -127,26 +127,20 @@
 		}
 
 		function startSession() {
-			if (session_status() == PHP_SESSION_DISABLED) {
-				if (!is_dir(getcwd()."/sessions")) { mkdir(getcwd()."/sessions"); }
-				$this->session_cache = getcwd()."/sessions/".md5($_SERVER['REMOTE_ADDR']);
-				$this->session_storage = "file";
-				if (file_exists($this->session_cache)) {
-					$this->session_array = unserialize(file_get_contents($this->session_cache));
-					if (is_array($this->session_array)) {
-						$this->username = $this->getSession('_auth_username');
-						$this->authenticated = ($this->getSession('_auth_authenticated') == "true");
-					}
-				}
-			} elseif (session_status() == PHP_SESSION_NONE) {
-				session_start();
-				if (isset($_SESSION['_auth_authenticated'])) {
-					$this->authenticated = ($this->getSession('_auth_authenticated') == "true");
-					$this->username = $this->getSession('_auth_username');
-				}
-			}
-			if ($this->debug) { $this->console_log($this->session_storage); }
-		}
+            if (session_status() == PHP_SESSION_DISABLED) {
+                if (!is_dir(getcwd()."/sessions")) { mkdir(getcwd()."/sessions"); }
+                $this->session_cache = getcwd()."/sessions/".md5($_SERVER['REMOTE_ADDR']);
+                $this->session_storage = "file";
+                if (file_exists($this->session_cache)) {
+                    $this->session_array = unserialize(file_get_contents($this->session_cache));
+                }
+            } elseif (session_status() == PHP_SESSION_NONE) {
+                session_start();
+            }
+            $this->username = $this->getSession('_auth_username');
+            $this->authenticated = ($this->getSession('_auth_authenticated') == "true" || $this->getSession('_auth_authenticated') == true || $this->getSession('_auth_authenticated') == 1);
+            if ($this->debug) { $this->console_log($this->session_storage); }
+        }
 
 		function hasher($string, $hashfunction = false, $salt = "") {
 			if ($hashfunction == "crypt") {

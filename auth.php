@@ -28,7 +28,14 @@
             $this->startSession();
 			$username = $this->db->escape($_POST['username']);
 			$password = $this->hasher($_POST['password']);
-			$users = $this->db->query("SELECT * FROM `".$this->opts['table']."` WHERE `".$this->opts['usernamecol']."` = '$username' AND `".$this->opts['passwordcol']."` = '$password'");
+			$users = $this->db->select(
+					"*",
+					$this->opts['table'],
+					array(
+						$this->opts['usernamecol'] => $username,
+						$this->opts['passwordcol'] => $password
+					)
+				);
 			if ($users->num_rows > 0) {
 				$this->username = $username;
 				$this->authenticated = true;
@@ -41,22 +48,31 @@
 		}
 
 		function addUser($username, $password) {
-			$this->db->query("INSERT INTO `".$this->opts['table']."` (`".$this->opts['usernamecol']."`,`".$this->opts['passwordcol']."`) VALUES ('$username','".$this->hasher($password)."')");
+			$this->db->insert($this->opts['table'], array(
+					$this->opts['usernamecol'] => $username,
+					$this->opts['passwordcol'] => $this->hasher($password)
+				));
 			return ($this->db->errno > 0 ? false: true);
 		}
 
 		function changePassword ($username, $password) {
-			$this->db->query("UPDATE `".$this->opts['table']."` SET `".$this->opts['passwordcol']."` = '".$this->hasher($password)."' WHERE `".$this->opts['usernamecol']."` = '$username'");
+			$this->db->update($this->opts['table'], array(
+					$this->opts['passwordcol'] => $this->hasher($password)
+				), array(
+					$this->opts['usernamecol'] => $username
+				));
 			return ($this->db->errno > 0 ? false: true);
 		}
 
 		function removeUser ($username) {
-			$this->db->query("DELETE * FROM `".$this->opts['table']."` WHERE `".$this->opts['usernamecol']."` = '$username'");
+			$this->db->delete($this->opts['table'], array(
+					$this->opts['usernamecol'] => $username
+				));
 			return ($this->db->errno > 0 ? false: true);
 		}
 
 		function listUsers() {
-			$users = $this->db->query("SELECT `".$this->opts['usernamecol']."` FROM `".$this->opts['table']."` ORDER BY `".$this->opts['usernamecol']."`");
+			$users = $this->db->select($this->opts['usernamecol'], $this->opts['table'], array(), "", array($this->opts['usernamecol'] => "ASC"));
 			$retn = array();
 			while($user = $users->fetch_assoc()) {
 				$un_col = $this->opts['usernamecol'];

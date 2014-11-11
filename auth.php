@@ -135,7 +135,7 @@
 					$this->session_array = unserialize(file_get_contents($this->session_cache));
 					if (is_array($this->session_array)) {
 						$this->username = $this->getSession('_auth_username');
-						$this->authenticated = ($this->getSession('_auth_authenticated']) == "true");
+						$this->authenticated = ($this->getSession('_auth_authenticated') == "true");
 					}
 				}
 			} elseif (session_status() == PHP_SESSION_NONE) {

@@ -145,7 +145,7 @@
 					$this->username = $this->getSession('_auth_username');
 				}
 			}
-			$this->console_log($this->session_storage);
+			if ($this->debug) { $this->console_log($this->session_storage); }
 		}
 
 		function hasher($string, $hashfunction = false, $salt = "") {
